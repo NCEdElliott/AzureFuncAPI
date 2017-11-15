@@ -9,17 +9,18 @@ using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using System.Text;
 using MxxRealFunctionApp.Utilities;
+using System.Threading.Tasks;
 
 namespace MxxRealFunctionApp
 {
     public static class GetWeatherFunction
     {
         [FunctionName("GetWeatherFunction")]
-        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Function, 
-														   "get", "post", 
-														   Route = "GetWeather/CityState/{cityState}")]HttpRequestMessage req, string cityState, TraceWriter log)
+		public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, 
+																	   "get", "post", 
+																	   Route = "GetWeather/CityState/{cityState}")]HttpRequestMessage req, string cityState, TraceWriter log)
         {
-            log.Info("C# HTTP trigger function processed a request.");
+            log.Info($"C# HTTP trigger function processed a weather request for {cityState}.");
 
 			string query = $"select * from weather.forecast where woeid in (select woeid from geo.places(1) where text=\"{cityState}\")";
 			
@@ -27,7 +28,7 @@ namespace MxxRealFunctionApp
 
 			HttpClient client = new HttpClient();
 
-			string jsonResult = JsonFormatter.JsonPrettify(client.GetStringAsync(url).Result);
+			string jsonResult = JsonFormatter.JsonPrettify(await client.GetStringAsync(url));
 			
 			// Fetching the name from the path parameter in the request URL
 			return new HttpResponseMessage(HttpStatusCode.OK)
