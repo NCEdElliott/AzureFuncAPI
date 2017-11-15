@@ -4,22 +4,22 @@ using System.Net.Http;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
+using System.Threading.Tasks;
 using MxxRealFunctionApp.Utilities;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MxxRealFunctionApp
 {
-    public static class GetStockFunction
+    public static class GetExchangeRateFunction
     {
-        [FunctionName("GetStockFunction")]
-		public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, 
-														   "get",  
-														   Route = "GetStock/symbol/{symbol}")]HttpRequestMessage req, string symbol, TraceWriter log)
-        {
-            log.Info($"C# HTTP trigger function processed a stock request for {symbol}.");
+        [FunctionName("GetExchangeRateFunction")]
+		public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function,
+														   "get",
+														   Route = "GetExchangeRate/date/{date}/base/{baseCurrency}")]HttpRequestMessage req, string date, string baseCurrency, TraceWriter log)
+		{
+			log.Info($"C# HTTP trigger function processed an Exchange Rate request for {date} / {baseCurrency}.");
 
-			string url = $"https://api.iextrading.com/1.0/stock/{symbol}/quote";
+			string url = $"https://api.fixer.io/{date}?base={baseCurrency}";
 
 			HttpClient client = new HttpClient();
 
@@ -29,7 +29,7 @@ namespace MxxRealFunctionApp
 			{
 				return new HttpResponseMessage(HttpStatusCode.NotFound)
 				{
-					Content = new StringContent("{\"Error\": \"Stock not found\"}", Encoding.UTF8, "application/json")
+					Content = new StringContent("{\"Error\": \"Exchange Rates not found\"}", Encoding.UTF8, "application/json")
 				};
 			}
 			else

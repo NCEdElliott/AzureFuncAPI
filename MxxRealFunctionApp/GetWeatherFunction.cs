@@ -17,7 +17,7 @@ namespace MxxRealFunctionApp
     {
         [FunctionName("GetWeatherFunction")]
 		public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, 
-																	   "get", "post", 
+																	   "get",  
 																	   Route = "GetWeather/CityState/{cityState}")]HttpRequestMessage req, string cityState, TraceWriter log)
         {
             log.Info($"C# HTTP trigger function processed a weather request for {cityState}.");
@@ -29,12 +29,21 @@ namespace MxxRealFunctionApp
 			HttpClient client = new HttpClient();
 
 			string jsonResult = JsonFormatter.JsonPrettify(await client.GetStringAsync(url));
-			
-			// Fetching the name from the path parameter in the request URL
-			return new HttpResponseMessage(HttpStatusCode.OK)
-				   {
-						Content = new StringContent(jsonResult, Encoding.UTF8, "application/json")
-				   };
+
+			if (string.IsNullOrWhiteSpace(jsonResult))
+			{
+				return new HttpResponseMessage(HttpStatusCode.NotFound)
+				{
+					Content = new StringContent("{\"Error\": \"Weather info not found\"}", Encoding.UTF8, "application/json")
+				};
+			}
+			else
+			{
+				return new HttpResponseMessage(HttpStatusCode.OK)
+				{
+					Content = new StringContent(jsonResult, Encoding.UTF8, "application/json")
+				};
+			}
 		}
-    }
+	}
 }
