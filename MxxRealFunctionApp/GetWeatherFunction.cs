@@ -5,13 +5,19 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using static System.Net.WebRequestMethods;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
+using System.Text;
+using MxxRealFunctionApp.Utilities;
 
 namespace MxxRealFunctionApp
 {
     public static class GetWeatherFunction
     {
         [FunctionName("GetWeatherFunction")]
-        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = "HttpTriggerCSharp/CityState/{cityState}")]HttpRequestMessage req, string cityState, TraceWriter log)
+        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Function, 
+														   "get", "post", 
+														   Route = "GetWeather/CityState/{cityState}")]HttpRequestMessage req, string cityState, TraceWriter log)
         {
             log.Info("C# HTTP trigger function processed a request.");
 
@@ -21,10 +27,13 @@ namespace MxxRealFunctionApp
 
 			HttpClient client = new HttpClient();
 
-			string jsonResult = client.GetStringAsync(url).Result;
-
+			string jsonResult = JsonFormatter.JsonPrettify(client.GetStringAsync(url).Result);
+			
 			// Fetching the name from the path parameter in the request URL
-			return req.CreateResponse(HttpStatusCode.OK, jsonResult);
-        }
+			return new HttpResponseMessage(HttpStatusCode.OK)
+				   {
+						Content = new StringContent(jsonResult, Encoding.UTF8, "application/json")
+				   };
+		}
     }
 }
