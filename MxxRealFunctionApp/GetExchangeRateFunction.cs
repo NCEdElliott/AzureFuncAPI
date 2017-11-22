@@ -7,6 +7,8 @@ using Microsoft.Azure.WebJobs.Host;
 using System.Threading.Tasks;
 using MxxRealFunctionApp.Utilities;
 using System.Text;
+using MxxRealFunctionApp.Repositories;
+using MxxRealFunctionApp.Models;
 
 namespace MxxRealFunctionApp
 {
